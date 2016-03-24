@@ -1,0 +1,40 @@
+# Zera
+
+# Previous Site
+ProgOr () {
+
+    img=$(python3 -c 'from urllib.request import urlopen; from bs4 import BeautifulSoup; url = "http://zerator.tv/programmation/"; html = urlopen(url); soup = BeautifulSoup(html, "html.parser"); imgs = soup.findAll("div", {"class":"page--prog"}); print(*(img.a["href"] for img in imgs));')
+    TMPFILE=$(mktemp)
+    wget -q "$img" -O $TMPFILE.jpg
+    qlmanage -p "$TMPFILE.jpg" >& /dev/null
+    rm $TMPFILE.jpg
+}
+
+#New Site
+Prog () {
+
+    img=$(curl -s 'http://zerator.com/wp-json/pages/prog' -H 'Accept: application/json, text/plain, */*' | python3 -c 'import sys, json; prg = json.load(sys.stdin)["acf"]["thumbnail"]; print( prg )')
+
+    TMPFILE=$(mktemp)
+    wget -q "$img" -O $TMPFILE.jpg
+    qlmanage -p "$TMPFILE.jpg" >& /dev/null
+    rm $TMPFILE.jpg
+}
+
+# TWITCH
+
+On () {
+
+    f=$(curl -s 'Accept: application/vnd.twitchtv.v3+json' -X GET https://api.twitch.tv/kraken/users/Duciis/follows/channels | python3 -c 'import sys, json; api = json.load(sys.stdin)["follows"]; print( ",".join(ap["channel"]["display_name"] for ap in api))')
+
+    f=$(curl -s 'Accept: application/vnd.twitchtv.v3+json' -X GET https://api.twitch.tv/kraken/streams?channel=$f | python3 -c 'import sys, json; api = json.load(sys.stdin)["streams"]; print("🍿  ONLINE STREAM STATUS 🍿"); print( "\n".join("✔  \t" + ap["channel"]["display_name"] + "\t " + ap["channel"]["status"] for ap in api))')
+
+    echo -e "$f"
+
+
+}
+
+twitch () {
+   echo "Lanching" $1 "stream -> Grab a 🍺  !"
+   livestreamer twitch.tv/$1 source --hls-live-edge 10 --hls-segment-threads 2
+}
