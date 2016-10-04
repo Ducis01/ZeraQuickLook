@@ -25,16 +25,76 @@ Prog () {
 
 On () {
 
-    f=$(curl -s 'Accept: application/vnd.twitchtv.v3+json' -X GET https://api.twitch.tv/kraken/users/Duciis/follows/channels | python3 -c 'import sys, json; api = json.load(sys.stdin)["follows"]; print( ",".join(ap["channel"]["display_name"] for ap in api))')
+    f=$(curl -s 'Accept: application/vnd.twitchtv.v3+json' -H 'Client-ID: sakgyrm922mln5jckrew3a3uzt4xoed' -X GET https://api.twitch.tv/kraken/users/Duciis/follows/channels | python3 -c 'import sys, json; api = json.load(sys.stdin)["follows"]; print( ",".join(ap["channel"]["display_name"] for ap in api))')
 
-    f=$(curl -s 'Accept: application/vnd.twitchtv.v3+json' -X GET https://api.twitch.tv/kraken/streams?channel=$f | python3 -c 'import sys, json; api = json.load(sys.stdin)["streams"]; print("🍿  ONLINE STREAM STATUS 🍿"); print( "\n".join("✔  \t" + ap["channel"]["display_name"] + "\t " + ap["channel"]["status"] for ap in api))')
+    f=$(curl -s 'Accept: application/vnd.twitchtv.v3+json' -H 'Client-ID: sakgyrm922mln5jckrew3a3uzt4xoed' -X GET https://api.twitch.tv/kraken/streams?channel=$f | python3 -c 'import sys, json; api = json.load(sys.stdin)["streams"]; print("🍿  ONLINE STREAM STATUS 🍿"); print( "\n".join("✔  \t" + ap["channel"]["display_name"] + "\t " + ap["channel"]["status"] for ap in api))')
 
     echo -e "$f"
 
 
 }
 
+chat () {
+
+   open -a "Google Chrome" https://www.twitch.tv/$1/chat?popout=
+
+}
+
 twitch () {
-   echo "Lanching" $1 "stream -> Grab a 🍺  !"
-   livestreamer twitch.tv/$1 source --hls-live-edge 10 --hls-segment-threads 2
+
+   quality="source"
+   time="0"
+   delay="10"
+
+   while :
+   do
+      case "$1" in
+         -q | --quality)
+            quality="$2"
+            shift 2
+            ;;
+        -d | --dealy)
+            $del="$2"
+            shift 2
+            ;;
+         -a | --audio)
+            quality="audio"
+            shift 1
+            ;;
+         -t | --timeout)
+            echo "Timeout set to $2 s"
+            time="$2"
+            shift 2
+            ;;
+         -h | --hour)
+            echo "Timeout set to 1h"
+            time="3600"
+            shift 1
+            ;;
+        --help)
+            echo "💡  Command AVALAIBLE 💡 "
+            echo "💡  twitch [-d delay] [-q quality] [-a --audio] [-h --hour] [-t timeout] stream 💡 "
+            return 0
+            ;;
+         --) # End of all options
+            shift
+            break
+            ;;
+         -*)
+            echo "Error: Unknown option: $1" >&2
+            return 1
+            ;;
+         *)  # No more options
+            break
+            ;;
+         esac
+   done
+
+   echo "Lanching" $1 "stream ["$quality"] -> Grab a 🍺  !"
+   if [ "$time" -gt "0" ]
+   then
+      timeout $time "livestreamer twitch.tv/$1 $quality --hls-live-edge $delay --hls-segment-threads 2"
+   else
+      livestreamer twitch.tv/$1 $quality --hls-live-edge 10 --hls-segment-threads 2
+   fi
 }
