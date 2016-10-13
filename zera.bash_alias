@@ -25,7 +25,7 @@ Prog () {
 
 On () {
 
-    f=$(curl -s 'Accept: application/vnd.twitchtv.v3+json' -H 'Client-ID: sakgyrm922mln5jckrew3a3uzt4xoed' -X GET https://api.twitch.tv/kraken/users/Duciis/follows/channels | python3 -c 'import sys, json; api = json.load(sys.stdin)["follows"]; print( ",".join(ap["channel"]["display_name"] for ap in api))')
+    f=$(curl -s 'Accept: application/vnd.twitchtv.v3+json' -H 'Client-ID: sakgyrm922mln5jckrew3a3uzt4xoed' -X GET https://api.twitch.tv/kraken/users/Duciis/follows/channels?limit=500 | python3 -c 'import sys, json; api = json.load(sys.stdin)["follows"]; print( ",".join(ap["channel"]["display_name"] for ap in api))')
 
     f=$(curl -s 'Accept: application/vnd.twitchtv.v3+json' -H 'Client-ID: sakgyrm922mln5jckrew3a3uzt4xoed' -X GET https://api.twitch.tv/kraken/streams?channel=$f | python3 -c 'import sys, json; api = json.load(sys.stdin)["streams"]; print("🍿  ONLINE STREAM STATUS 🍿"); print( "\n".join("✔  \t" + ap["channel"]["display_name"] + "\t " + ap["channel"]["status"] for ap in api))')
 
